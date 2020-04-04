@@ -1,26 +1,14 @@
 - hosts: localhost
   connection: local
-  vars:
-    the_user: "{{ ansible_user_id }}"
-  become: true
-  become_method: sudo
-  roles:
-    - role: andrewrothstein.istio
-  
-
-
-- hosts: localhost
-  connection: local
   gather_facts: no
+  become: vagrant
   environment:
         KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/kindconfig-new"
   roles:
-    - role: ngx.istio
+    - role: ngx.kind
       vars:
        - kube_path: "{{ lookup('env','HOME') }}/.kube/"
        - kube_configfile: kindconfig-new   
-       - kube_context: kind
        - path: /usr/local/istio/bin
-      become: vagrant
 
  
