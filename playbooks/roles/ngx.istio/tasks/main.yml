@@ -1,0 +1,57 @@
+###################################################################
+########################## Usage Example###########################
+# - hosts: localhost
+#   connection: local
+#   gather_facts: no
+#   become: vagrant
+#   environment:
+#         KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/kindconfig-new"
+#   roles:
+#     - role: ngx.istio
+#       vars:
+#        - kube_path: "{{ lookup('env','HOME') }}/.kube/"
+#        - kube_configfile: kindconfig-new   
+#        - kube_context: kind
+#        - path: /usr/local/istio/bin
+#####################################################################
+
+
+
+
+
+- shell: kubectl config use-context {{ kube_context }}
+  become: vagrant 
+  environment:
+         KUBECONFIG: "{{ kube_path }}/{{ kube_configfile }}"
+
+- shell: kubectl get pods --all-namespaces | grep istio | wc -w
+  register: result
+  become: vagrant 
+  ignore_errors: yes
+  environment:
+         KUBECONFIG: "{{ kube_path }}/{{ kube_configfile }}"
+- debug: 
+    var:  result.stdout_lines
+
+
+- name: add {{path}} to path
+  lineinfile:  
+      dest: /etc/environment
+      state: present
+      backrefs: yes
+      regexp: 'PATH=(["]*)((?!.*?{{ path }}).*?)(["]*)$'
+      line: 'PATH=\1\2:{{ path }}\3'
+  become: yes
+
+- name: install istio
+  command: istioctl manifest apply --set profile=demo --set values.gateways.istio-ingressgateway.sds.enabled=true 
+             --set values.global.k8sIngress.enabled=true 
+             --set values.global.k8sIngress.enableHttps=true 
+             --set values.global.k8sIngress.gatewayName=ingressgateway 
+             --set values.global.jwtPolicy=first-party-jwt --force
+  environment:
+         KUBECONFIG: "{{ kube_path }}/{{ kube_configfile }}"
+         PATH: "{{ lookup('env','PATH') }}:{{ path }}"
+  become: yes
+  ## istio will not intall is already installed, It skips
+  when:  result.stdout[0]  ==  "0"

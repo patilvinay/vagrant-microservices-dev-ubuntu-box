@@ -1,0 +1,36 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Deploy site files from Github repository
+      git:
+        repo: git@github.com:patilvinay/nbp-ms.git
+        dest: ~/nbp-ms
+        key_file: "{{ lookup('env','HOME') }}/.ssh-host/vinay-wsl-git"
+        accept_hostkey: yes
+        force: yes
+      become: vagrant
+
+
+
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+## This role created install the helm chart in the k8s
+## it choose the k8s based on the config file of the k8s and the context selected
+## name space where the chart has to be executed has to be provided
+## app name to be proviced
+    - role: ngx.helm
+      vars:
+      - helm_ns: ngx-ns
+      - chart_path: "~/nbp-ms "
+      - app_name: business-ms
+      - helm_context: kind
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/kindconfig-new"
+      become: vagrant
+  
+
+
