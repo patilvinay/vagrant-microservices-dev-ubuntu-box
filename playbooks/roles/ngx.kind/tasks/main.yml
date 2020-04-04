@@ -48,7 +48,7 @@
   retries: 60
   delay: 4
   
-- pause: seconds=60
+  #- pause: seconds=60
 - debug:
     msg: "{{ kube_path }}/{{ kube_configfile }}"
 
