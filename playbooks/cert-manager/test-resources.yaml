@@ -1,0 +1,14 @@
+
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: selfsigned-cert
+  namespace: cert-manager-test
+spec:
+  dnsNames:
+    - ngxconnect.in
+  secretName: selfsigned-cert-tls
+  issuerRef:
+    name: test-selfsigned
+---

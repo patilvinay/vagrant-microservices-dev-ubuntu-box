@@ -4,6 +4,8 @@
 #This will install is kind does not exist. If already exist it just starts the kind
 - name: Installing/restarting kind
   include: kind.yaml
+  tags:
+    - kind-restart
 
 
 - name: Installing istio
@@ -11,6 +13,9 @@
 
 - name: Installing ms-business
   include: install-business-ms.yaml
+  tags:
+    - install-business-ms
+
     
 
 
